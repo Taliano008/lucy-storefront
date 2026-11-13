@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { config } from '../config';
-import { BUDGETS, type Availability, type Category, type Product, type SortKey } from '../data';
+import { BUDGETS, CATEGORIES, type Availability, type Category, type Product, type SortKey } from '../data';
 import { discountPct } from './format';
 
 export const matchesQuery = (p: Product, q: string) => {
@@ -32,6 +32,26 @@ export const PRESETS: Record<string, Partial<Filters>> = {
   'starter-packs': { cats: ['Bedsitter Kitchen', 'Hostel Storage', 'Bedding & Comfort'], avail: 'in', sort: 'low' },
   'glow-up': { cats: ['Aesthetic Lighting', 'Bedding & Comfort'], sort: 'low' },
 };
+
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+/** Filters for a route: a named preset, or "category/<slug>" for a single category. */
+function presetFor(name: string): Partial<Filters> {
+  if (name.startsWith('category/')) {
+    const cat = CATEGORIES.find((c) => slug(c) === name.slice(9));
+    return cat ? { cats: [cat] } : {};
+  }
+  return PRESETS[name] ?? {};
+}
+
+/** Where a promo banner button can send shoppers (Admin → Promotions). */
+export const PROMO_LINKS: { value: string; label: string }[] = [
+  { value: 'shop', label: 'All products' },
+  { value: 'deals', label: 'Deals (biggest discount first)' },
+  { value: 'starter-packs', label: 'Starter Packs (kitchen, storage, bedding)' },
+  { value: 'glow-up', label: 'Glow-Up picks (lighting & bedding)' },
+  ...CATEGORIES.map((c) => ({ value: 'category/' + slug(c), label: 'Category: ' + c })),
+];
 
 /** Search, filter, sort and paginate the catalogue. Any filter change resets paging. */
 export function useCatalogue(products: Product[]) {
@@ -71,7 +91,7 @@ export function useCatalogue(products: Product[]) {
       update({ cats: filters.cats.includes(c) ? filters.cats.filter((x) => x !== c) : [...filters.cats, c] }),
     clearAll: () => update({ q: '', cats: [], budget: null, avail: null }),
     /** Replace all filters with a named preset (unknown names reset to the full catalogue). */
-    applyPreset: (name: string) => update({ ...EMPTY, ...(PRESETS[name] ?? {}) }),
+    applyPreset: (name: string) => update({ ...EMPTY, ...presetFor(name) }),
     total,
     start,
     page: current,

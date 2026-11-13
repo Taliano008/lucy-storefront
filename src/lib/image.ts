@@ -6,7 +6,7 @@ const QUALITY = 0.8;
  * Read an image file, shrink it to fit MAX_EDGE and re-encode as JPEG, returning a data: URL.
  * Keeps each photo around 40–90 KB so a catalogue's worth fits in browser storage.
  */
-export async function fileToResizedDataUrl(file: File): Promise<string> {
+export async function fileToResizedDataUrl(file: File, maxEdge = MAX_EDGE): Promise<string> {
   if (!file.type.startsWith('image/')) throw new Error('That file is not an image.');
   const src = URL.createObjectURL(file);
   try {
@@ -16,7 +16,7 @@ export async function fileToResizedDataUrl(file: File): Promise<string> {
       el.onerror = () => reject(new Error('Could not read that image.'));
       el.src = src;
     });
-    const scale = Math.min(1, MAX_EDGE / Math.max(img.naturalWidth, img.naturalHeight));
+    const scale = Math.min(1, maxEdge / Math.max(img.naturalWidth, img.naturalHeight));
     const canvas = document.createElement('canvas');
     canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
     canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));

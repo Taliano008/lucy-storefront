@@ -6,11 +6,9 @@ import { Marquee } from '../components/Marquee';
 import { Pagination } from '../components/Pagination';
 import { ProductCard } from '../components/ProductCard';
 import { PromoBanners } from '../components/PromoBanners';
-import { navigate, useMediaQuery } from '../lib/hooks';
+import { MOBILE_QUERY, navigate, useMediaQuery } from '../lib/hooks';
 import { useCatalogue } from '../lib/useCatalogue';
 import { useProducts } from '../store';
-
-export const MOBILE_QUERY = '(max-width: 900px)';
 
 export function Storefront({ route, tick }: { route: string; tick: number }) {
   const { products } = useProducts();

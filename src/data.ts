@@ -1,3 +1,5 @@
+import { config } from './config';
+
 export type Badge = '' | 'CAMPUS STEAL' | 'HOT DEAL' | 'HOSTEL ESSENTIAL' | 'NEW';
 
 export interface Product {
@@ -76,3 +78,69 @@ const SEED: [string, Category, number, number, Badge, boolean][] = [
 export const SEED_PRODUCTS: Product[] = SEED.map(([name, cat, price, orig, badge, inStock], id) => ({
   id, name, cat, price, orig, badge, inStock,
 }));
+
+/** A promo banner on the storefront. Edited from Admin Studio → Promotions. */
+export interface Banner {
+  id: string;
+  on: boolean;
+  /** Small rotated label, e.g. "PROMO". Empty = no label. */
+  sticker: string;
+  title: string;
+  /** Optional line under the title. */
+  subtitle: string;
+  button: string;
+  /** Storefront view the button opens — a key from PROMO_LINKS. */
+  link: string;
+  /** Photo (main banner slides): uploaded data: URL, https link, or a file in /public. */
+  photo: string;
+}
+
+export interface Promos {
+  marquee: { on: boolean; text: string };
+  /** The main banner: one or more slides that rotate every `seconds`. */
+  carousel: { on: boolean; seconds: number };
+  slides: Banner[];
+  side: Banner;
+}
+
+/** Each slide's photo is ~60–150 KB in browser storage, so keep the slideshow small. */
+export const MAX_SLIDES = 6;
+
+export const newSlideId = () => 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+export const BLANK_SLIDE: Omit<Banner, 'id'> = {
+  on: true,
+  sticker: 'NEW',
+  title: 'New promotion',
+  subtitle: '',
+  button: 'Shop now',
+  link: 'deals',
+  photo: '',
+};
+
+export const DEFAULT_PROMOS: Promos = {
+  marquee: { on: true, text: config.marqueeText },
+  carousel: { on: true, seconds: 6 },
+  slides: [
+    {
+      id: 'glow-up',
+      on: true,
+      sticker: 'PROMO',
+      title: 'Bedsitter Glow-Up Under KES 3,000',
+      subtitle: '',
+      button: 'Shop the deal',
+      link: 'glow-up',
+      photo: config.promoPhoto,
+    },
+  ],
+  side: {
+    id: 'side',
+    on: true,
+    sticker: 'HOLIDAY DISCOUNT',
+    title: 'Back-to-Campus Essentials',
+    subtitle: 'Hostel Starter Packs',
+    button: 'View packs',
+    link: 'starter-packs',
+    photo: '',
+  },
+};

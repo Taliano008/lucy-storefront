@@ -3,12 +3,24 @@ import { ImagePanel, ThumbButton, uploadImage } from '../components/ImageEditor'
 import { BADGES, CATEGORIES, type Badge, type Category } from '../data';
 import { discountPct } from '../lib/format';
 import { useProducts } from '../store';
+import { AdminPromotions } from './AdminPromotions';
+
+type Tab = 'products' | 'promotions';
+const readTab = (): Tab => (window.location.hash === '#promotions' ? 'promotions' : 'products');
 
 const COLS = ['PHOTO', 'PRODUCT', 'CATEGORY', 'PRICE (KES)', 'ORIGINAL (KES)', 'OFF', 'BADGE', 'STOCK'];
 
 export function Admin() {
   const { products, patch, add, storageFull } = useProducts();
+  const [tab, setTab] = useState<Tab>(readTab);
   const [imgOpen, setImgOpen] = useState<number | null>(null);
+
+  // Tab lives in the URL (#promotions) so it survives reloads and can be bookmarked.
+  useEffect(() => {
+    const on = () => setTab(readTab());
+    window.addEventListener('hashchange', on);
+    return () => window.removeEventListener('hashchange', on);
+  }, []);
   const [imgError, setImgError] = useState({ id: -1, msg: '' });
   const errorFor = (id: number) => (imgError.id === id ? imgError.msg : '');
   const [aq, setAq] = useState('');
@@ -41,19 +53,41 @@ export function Admin() {
         </div>
         <div className="admin__actions">
           <a href="/" className="admin__view">View store</a>
-          <button
-            className="admin__new"
-            onClick={() => {
-              setAq('');
-              setNewId(add());
-            }}
-          >
-            + New product
-          </button>
+          {tab === 'products' && (
+            <button
+              className="admin__new"
+              onClick={() => {
+                setAq('');
+                setNewId(add());
+              }}
+            >
+              + New product
+            </button>
+          )}
         </div>
       </header>
 
+      <nav className="admin__tabs" aria-label="Admin sections">
+        <a href="#products" className={tab === 'products' ? 'is-current' : ''} aria-current={tab === 'products' ? 'page' : undefined}>
+          Products
+        </a>
+        <a href="#promotions" className={tab === 'promotions' ? 'is-current' : ''} aria-current={tab === 'promotions' ? 'page' : undefined}>
+          Promotions
+        </a>
+      </nav>
+
       <div className="admin__body">
+        {storageFull && (
+          <p className="admin__alert" role="alert">
+            Browser storage is full, so your latest changes will be lost on reload. Remove some uploaded photos or use
+            image links instead.
+          </p>
+        )}
+
+        {tab === 'promotions' ? (
+          <AdminPromotions />
+        ) : (
+        <>
         <div className="metrics">
           {metrics.map((m) => (
             <div key={m.label} className="metric">
@@ -62,13 +96,6 @@ export function Admin() {
             </div>
           ))}
         </div>
-
-        {storageFull && (
-          <p className="admin__alert" role="alert">
-            Browser storage is full, so your latest changes will be lost on reload. Remove some uploaded photos or use
-            image links instead.
-          </p>
-        )}
 
         <div className="admin__bar">
           <h1>
@@ -175,6 +202,8 @@ export function Admin() {
             })}
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

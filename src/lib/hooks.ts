@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 
+/** Below this width the storefront switches to its mobile layout. */
+export const MOBILE_QUERY = '(max-width: 900px)';
+
 export function useMediaQuery(query: string) {
   const [match, setMatch] = useState(() => window.matchMedia(query).matches);
   useEffect(() => {

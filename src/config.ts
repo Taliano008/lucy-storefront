@@ -13,6 +13,11 @@ export const config = {
   marqueeScroll: true,
   /** Lucy's WhatsApp number in international format without "+", e.g. "2547XXXXXXXX". Empty = let the customer pick a chat. */
   whatsappNumber: '',
+  /**
+   * Lifestyle photo in the lime promo banner. Put the file at public/promo/glow-up.jpg (or change
+   * this path), then commit and push. Missing file → the striped placeholder shows instead.
+   */
+  promoPhoto: '/promo/glow-up.jpg',
   marqueeText: '🔥 Free delivery in Juja, Kahawa & CBD for orders > KES 2,500 • Pay via M-Pesa on Delivery',
   pageSize: 9,
   mobilePageSize: 6,
